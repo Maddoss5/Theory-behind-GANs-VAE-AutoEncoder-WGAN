@@ -1,0 +1,43 @@
+Encoders And Decoders
+---------------------------------------------------
+
+Encoders basically transform one form of data into another, Most of the time it projects data into smaller spaces called latent space in Autoencoders. So you could have an image of 28*28 dimension which is 784 features for 1 input and convert this to 2D latent space which is just 2 dimension .
+i.e (x1,x2,x3,....x784) ---> (x1,x2)
+
+For more details use higher number of latent dimension .
+in this case lets say just 2 dimension and we have dataset of pants and shirts then images closer to positive x could be a shirt , images more towards positive y could be a pant. 
+
+Decoder ( in Autoencoder and VAE ) - Job of decoder is to reconstruct the image as best as it could from the latent space (input is latent space) and output is reconstructed image .
+
+Since the latent space dimension is much smaller than original dimension , this acts as a bottleneck and hence using this we can create a new image (because some of details gets lost due to bottleneck )
+
+how to create new image -->
+Lets say we have dataset of peoples faces , with latent dimension = 10 .
+
+Lets say latent dimension 1 (which represents x axis ) is learned such a way that positive x is for blonde haired people and negative for black haired.
+
+So if we use encoder on one of the original images , get their latent space and move a little to the x , your image will have blonde hair .
+
+
+A little more details about encoder and decoder 
+--------------------------------------------------
+
+So in practice we use encoder with Conv2D first so we can find edges and other things. Because if we directly connect a neural circuit to an image the result would not contain the structural relation of the image (since it would be flattened to 784 ). So we use multiple Conv2D layers to find out different patterns etc. Then we add neural circuitry on top (could add Layernorm etc too  ) 
+
+And on Decoder side we use Conv2DTranspose to increase the dimension to original dimension. 
+
+
+Problems with AutoEncoder
+--------------------------------------------------
+
+AutoEncoder is deterministic in nature , Once the model is trained the same input will always point to same location. And output will be the same too . 
+Additionally AutoEncoder might create holes , e.g lets say an image latent space is (10,10) but area around it (lets say 10.5,9.5) might not give any readable results (total noise image).
+SO we want an image to be pointed to a latent dimension in such a way that it gets spread (like a gaussian is spread around mean ).
+
+Training AutoEncoder 
+-------------------------------------------------
+
+P_theta(x) represent probability of image dataset.
+
+
+
