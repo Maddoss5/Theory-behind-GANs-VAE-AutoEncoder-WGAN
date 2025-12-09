@@ -40,4 +40,74 @@ Training AutoEncoder
 P_theta(x) represent probability of image dataset.
 
 
+Let Z be the latent distribution 
+So G(z) is the distribution of latent dimension Z .
+
+Encoder Job is to predict G(z|x)
+
+And Decoder job is to Find out P(x|z)
+
+So we want to minimize   (Decoder(Encoder(P_theta(x)))-P_theta(x)) . 
+We can use MSE mean square error since we want it to spread in all directions. 
+
+so 
+Loss= MSE ( (Decoder(Encoder(P_theta(x)))-P_theta(x)) ) 
+
+
+
+
+Variational autoencoder 
+-------------------------------------------------
+
+SO we want continous probability distribution in latent space , and also we want image generation to be probabilistic not deterministic so we modify loss and Encoder
+
+Here Encoder instead of outputting the image representation in latent space outputs the mean and variance of latent space outputs for the input
+
+i.e  mean,Variance=Encoder(x) 
+
+We want it to be spread equally so we use gassian.
+
+Then we sample from this distribution using gaussian distribution with mean and variance that we found from encoder outputs. But since it is sampled , gradients cant flow back (cant flow back through randomize functions )
+
+So we use reparatemirization trick .
+
+We sample from a Gaussian dist of mean = 1 and std dev=1 given by epsilon
+
+Then we generate our sample as 
+
+x'=mean + sqrt(variance)*epsilon
+
+Now using this we can assume epsilon to be a constant and hence gradients can flow back now. 
+
+Notice how for same image , the latent space output is now different. 
+This is the input to decoder.
+
+Change in LOSS function 
+------------------------
+
+The loss function remains mostly similar to AutoEncoder but we want our Distribution to be more like Gaussian so we add additional penalty to it .
+
+Loss= MSE ( (Decoder(Encoder(P_theta(x)))-P_theta(x)) ) + KL divergence of ( P_theta(z|x) || NOrmal(0,1) )
+
+Since we want our distribution of latent space to be as close to Normal Distribution with 0 mean and 1 variance  as possible .
+
+For KL divergence of P||Q and both are gaussiaan has a closed form solution which is 
+KL = log ( std2/std1) + ( std1^2 + ( mean1-mean2  )^2)/(2*std2^2) -1/2 
+
+
+Why ? Why do we force distriubtion to normal distributino with mean =0 and std=1 ??
+ANswer is we need to force it in a closed space . if our mean outputs 300 or something that we have never seen , we will get noisy outputs . So we need to force it in a space that we want all outputs to be in .
+
+KL divergence comapred to Normal with mean = 0 and stddev=1 isnt magical , we can find it with any mean and std dev (small enouggh ) , But you would have to make changes to reparameteization too .
+
+it is completely fine to find KL divergence of (Encoder(X)|| Normal (mean = 0 , stddev=5)) . Here the spread would be wider though.
+
+
+Finally we dont want KL divergence to have higher weight to reconstruction loss so we use something called Beta annealing. ( slowly grow weight of KL divergence term in loss ) 
+
+
+Loss= MSE ( (Decoder(Encoder(P_theta(x)))-P_theta(x)) ) + Beta*KL divergence of ( P_theta(z|x) || NOrmal(0,1) )
+
+
+in my trial i first reduced reconstruction term to a very small value (by epoch 5 )and then turned Beta = 0.1 to 0.5 at epoch 20. 
 
